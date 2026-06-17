@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventEase - Food Menu</title>
+
+<style>
+body, html { margin: 0; padding: 0; font-family: Arial, sans-serif; height: 100%; }
+
+/* Full-page blurred background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/assests/food back.jpg') no-repeat center center;
+    background-size: cover;
+    filter: blur(3px);
+    z-index: -1;
+}
+
+.navbar { width: 100%; background-color: #333; display: flex; justify-content: space-around; position: fixed; top: 0; z-index: 100; }
+.navbar a { color: white; text-decoration: none; padding: 15px 20px; display: block; font-weight: bold; }
+.navbar a:hover, .navbar a.active { background-color: gold; color: black; }
+
+.hero-container { position: relative; width: 100%; height: 40vh; margin-top: 60px; overflow: hidden; }
+.hero-image { display: none; } /* hide original hero image */
+.hero-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.hero-overlay h1 { color: white; font-size: 48px; text-shadow: 2px 2px 8px rgba(0,0,0,0.7); }
+
+.food-container { max-width: 900px; margin: -30px auto 40px auto; padding: 30px; background-color: rgba(255,255,255,0.95); border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.2); text-align: center; }
+.select-items { margin: 20px 0; padding: 12px; font-size: 16px; border-radius: 5px; border: 1px solid #ccc; }
+
+.food-btns { margin: 20px 0; display: flex; justify-content: center; flex-wrap: wrap; }
+.food-btns button { padding: 15px 25px; margin: 10px; font-size: 16px; cursor: pointer; border: none; border-radius: 5px; background-color: gold; font-weight: bold; }
+.food-btns button:hover { background-color: orange; color: black; }
+
+.food-list { display: none; text-align: left; margin-top: 20px; }
+.food-category { font-weight: bold; margin-top: 15px; font-size: 18px; }
+.food-item { display: flex; align-items: center; margin: 5px 0; font-style: italic; }
+.food-item input[type="checkbox"] { margin-right: 10px; width: 18px; height: 18px; cursor: pointer; }
+
+.submit-btn { margin-top: 30px; padding: 15px 25px; font-size: 18px; cursor: pointer; border: none; border-radius: 5px; background-color: #333; color: white; font-weight: bold; }
+.submit-btn:hover { background-color: black; }
+
+@media(max-width:768px){
+    .hero-overlay h1 { font-size: 36px; }
+    .food-btns button { width: 90%; margin: 5px 0; }
+}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="event.html">Event</a>
+    <a href="food.html" class="active">Food Menu</a>
+    <a href="bill.html">Total Bill</a>
+    <a href="contact.html">Contact</a>
+</div>
+
+<div class="hero-container">
+    <img src="/assests/food back.jpg" alt="Hero Image" class="hero-image">
+    <div class="hero-overlay"><h1>Select Your Food</h1></div>
+</div>
+
+<div class="food-container">
+    <select id="numItems" class="select-items">
+        <option value="">Select number of items per plate</option>
+        <option value="15">15 Items - ₹150</option>
+        <option value="20">20 Items - ₹180</option>
+        <option value="25">25 Items - ₹200</option>
+        <option value="30">30+ Items - ₹300</option>
+    </select>
+
+    <div class="food-btns">
+        <button id="vegBtn">Veg</button>
+        <button id="nonVegBtn">Non-Veg</button>
+        <button id="mixedBtn">Both</button>
+    </div>
+
+    <div class="food-list" id="foodList"></div>
+
+    <button class="submit-btn" id="submitFood">Submit Food Selection</button>
+</div>
+
+<script>
+const navbarLinks = document.querySelectorAll('.navbar a');
+navbarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        navbarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+
+const vegBtn = document.getElementById('vegBtn');
+const nonVegBtn = document.getElementById('nonVegBtn');
+const mixedBtn = document.getElementById('mixedBtn');
+const foodListDiv = document.getElementById('foodList');
+const submitBtn = document.getElementById('submitFood');
+const numItemsSelect = document.getElementById('numItems');
+
+const foodMenus = {
+    veg: {
+        "Tiffins": ["Idly","Dosa","Puri","Mysore Bonda","Upma","Pongal"],
+        "Starters": ["Veg Manchurian","Paneer 65","Baby Corn Crispy","Mushroom Fry","Gobi 65","Veg Spring Rolls"],
+        "Biryanis & Pulavs": ["Veg Biryani","Paneer Biryani","Mushroom Biryani","Aloo Biryani","Veg Pulav","Paneer Pulav","Jeera Rice","Peas Pulav","Curd Rice","Tomato Rice"],
+        "Curries": ["Paneer Butter Masala","Veg Kurma","Mushroom Curry","Mixed Veg Curry","Aloo Gobi","Chana Masala","Dal Tadka","Palak Paneer","Kaju Curry","Veg Kolhapuri"],
+        "Fast Food": ["Veg Burger","Veg Pizza","French Fries","Veg Noodles","Veg Fried Rice","Veg Sandwich"],
+        "Desserts": ["Gulab Jamun","Rasgulla","Rasmalai","Double Ka Meetha","Carrot Halwa","Fruit Custard"],
+        "Ice Creams": ["Vanilla","Chocolate","Strawberry","Butterscotch","Mango","Black Currant"]
+    },
+    nonVeg: {
+        "Tiffins": ["Chicken Dosa","Egg Dosa","Chicken Idly Fry","Egg Puri","Chicken Upma","Egg Bonda"],
+        "Starters": ["Chicken 65","Chicken Manchurian","Pepper Chicken","Apollo Fish","Prawns Fry","Egg Spring Rolls"],
+        "Biryanis & Pulavs": ["Chicken Biryani","Mutton Biryani","Fish Biryani","Prawns Biryani","Egg Biryani","Chicken Pulav","Mutton Pulav","Keema Biryani","Special Chicken Biryani","Chicken Fry Piece Biryani"],
+        "Curries": ["Chicken Curry","Butter Chicken","Mutton Curry","Fish Curry","Prawns Curry","Egg Curry","Chicken Chettinad","Pepper Chicken Gravy","Chicken Korma","Natu Kodi Curry"],
+        "Fast Food": ["Chicken Burger","Chicken Pizza","Egg Noodles","Chicken Noodles","Chicken Fried Rice","Chicken Shawarma"],
+        "Desserts": ["Gulab Jamun","Rasmalai","Payasam","Brownie","Fruit Salad","Ice Cream Cup"],
+        "Ice Creams": ["Vanilla","Chocolate","Butterscotch","Strawberry","Mango","Black Currant"]
+    },
+    mixed: {
+        "Tiffins": ["Idly","Dosa","Egg Dosa","Puri","Veg Upma","Egg Bonda"],
+        "Starters": ["Chicken 65","Paneer 65","Veg Manchurian","Chicken Manchurian","Baby Corn Crispy","Apollo Fish"],
+        "Biryanis & Pulavs": ["Veg Biryani","Chicken Biryani","Egg Biryani","Paneer Biryani","Special Chicken Biryani","Veg Pulav","Chicken Pulav","Jeera Rice","Peas Pulav","Mushroom Biryani"],
+        "Curries": ["Paneer Butter Masala","Veg Kurma","Chicken Curry","Butter Chicken","Dal Tadka","Mixed Veg Curry","Egg Curry","Mushroom Curry","Pepper Chicken Gravy","Kaju Curry"],
+        "Fast Food": ["Veg Noodles","Chicken Noodles","Veg Pizza","Chicken Pizza","French Fries","Shawarma Roll"],
+        "Desserts": ["Gulab Jamun","Rasgulla","Brownie","Double Ka Meetha","Fruit Custard","Payasam"],
+        "Ice Creams": ["Vanilla","Chocolate","Strawberry","Butterscotch","Mango","Black Currant"]
+    }
+};
+
+let currentMenu = [];
+let selectedFoodItems = [];
+
+// Display food items
+function displayFood(menu) {
+    currentMenu = menu;
+    selectedFoodItems = [];
+    foodListDiv.innerHTML = '';
+    foodListDiv.style.display = 'block';
+
+    for (let category in menu) {
+        const catDiv = document.createElement('div');
+        catDiv.className = 'food-category';
+        catDiv.textContent = category;
+        foodListDiv.appendChild(catDiv);
+
+        menu[category].forEach(item => {
+            const itemDiv = document.createElement('div');
+            itemDiv.className = 'food-item';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.value = item;
+            checkbox.addEventListener('change', () => {
+                if (checkbox.checked) selectedFoodItems.push(item);
+                else selectedFoodItems = selectedFoodItems.filter(i => i !== item);
+            });
+
+            const label = document.createElement('label');
+            label.textContent = item;
+
+            itemDiv.appendChild(checkbox);
+            itemDiv.appendChild(label);
+            foodListDiv.appendChild(itemDiv);
+        });
+    }
+}
+
+vegBtn.addEventListener('click', () => displayFood(foodMenus.veg));
+nonVegBtn.addEventListener('click', () => displayFood(foodMenus.nonVeg));
+mixedBtn.addEventListener('click', () => displayFood(foodMenus.mixed));
+
+submitBtn.addEventListener('click', () => {
+    const maxItems = parseInt(numItemsSelect.value);
+    if (!maxItems) { alert("Please select number of items per plate."); return; }
+    if (selectedFoodItems.length > maxItems) { alert(`You selected ${selectedFoodItems.length}. Maximum is ${maxItems}.`); return; }
+    if (selectedFoodItems.length < maxItems) { alert(`You selected ${selectedFoodItems.length}. Please select exactly ${maxItems}.`); return; }
+
+    localStorage.setItem('foodSelection', JSON.stringify({
+        numItems: maxItems,
+        items: selectedFoodItems
+    }));
+    alert("Food selection submitted!");
+});
+</script>
+
+</body>
+</html>
