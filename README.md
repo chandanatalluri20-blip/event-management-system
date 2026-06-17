@@ -1,35 +1,128 @@
-# EventEase
+# 🎉 EventEase – Event Management System
 
-EventEase is an event management web application designed to simplify event planning, venue selection, budgeting, and booking workflows.
+## 📌 Overview
 
-## Features
+EventEase is a web-based Event Management System developed using HTML, CSS, and JavaScript. The platform helps users plan and organize events by selecting event types, choosing decorations, customizing event designs, selecting food menus, and generating a complete bill estimate.
 
-* Event Planning Workflow
-* Venue Selection
-* Budget Estimation
-* Cost Calculation
-* Booking Management
-* User-Friendly Interface
-* Responsive Design
+The project aims to simplify event planning through an interactive and user-friendly interface.
 
-## Upcoming Upgrade
+---
 
-EventEase is currently being upgraded into **EventGenie AI**, an AI-powered event planning platform featuring:
+## ✨ Features
 
-* Multilingual AI Assistant
-* Smart Venue Recommendations
-* Decoration Planning
-* Catering Planning
-* Event Visualization
-* AI Budget Analysis
-* Event Countdown & Notifications
+### 🏠 Home Page
 
-## Tech Stack
+* Attractive landing page
+* Easy navigation across all modules
 
-* HTML
-* CSS
+### ℹ️ About Page
+
+* Provides information about EventEase and its services
+
+### 🎊 Event Planning Module
+
+* Select event type
+* Enter customer details
+* Choose event date and time
+* Add welcome message
+* Select decoration packages
+* Upload custom event design (PDF)
+
+### 🍽 Food Menu Module
+
+* Select food items for events
+* Customize event catering requirements
+
+### 💰 Billing System
+
+* Calculates event expenses dynamically
+* Displays total estimated bill
+
+### 📞 Contact Module
+
+* Contact information display
+* Customer query submission form
+
+### 💾 Data Persistence
+
+* Uses Local Storage to store user selections and event information
+
+### 📱 Responsive Design
+
+* Works across desktop and mobile devices
+
+---
+
+## 🛠 Technologies Used
+
+* HTML5
+* CSS3
 * JavaScript
+* Local Storage API
+* Git
+* GitHub
+* GitHub Pages
 
-## Author
+---
 
-Chandana Talluri
+## 📂 Project Structure
+
+* Home Page
+* About Page
+* Event Planning Page
+* Food Menu Page
+* Billing Page
+* Contact Page
+
+---
+
+## 🚀 Live Demo
+
+🔗 https://chandanatalluri20-blip.github.io/event-management-system/
+
+---
+
+## 🔮 Future Enhancements
+
+* User Authentication System
+* Online Payment Integration
+* Database Connectivity (MySQL/MongoDB)
+* Admin Dashboard
+* Booking Management System
+* Email & SMS Notifications
+* Event Feedback System
+
+### 🤖 EventGenie AI (Future AI Module)
+
+EventGenie AI will act as an intelligent event planning assistant integrated into EventEase.
+
+Planned Features:
+
+* AI-powered event recommendations
+* Decoration suggestions based on event type and budget
+* Smart food menu recommendations
+* Personalized event planning assistance
+* Budget optimization suggestions
+* Automated event schedule generation
+* AI chatbot for customer support
+
+The goal is to transform EventEase into a smart AI-powered event planning platform.
+
+---
+
+## 👩‍💻 Author
+
+**Talluri Chandana**
+
+B.Tech Computer Science Engineering
+Anurag University, Hyderabad
+
+Passionate about:
+
+* Web Development
+* Artificial Intelligence
+* Digital Marketing
+* UI/UX Design
+
+GitHub:
+https://github.com/chandanatalluri20-blip
