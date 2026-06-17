@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventEase - Event Design</title>
+
+<style>
+body, html { margin: 0; padding: 0; font-family: Arial, sans-serif; height: 100%; }
+
+/* Full-page blurred background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/assests/event back.webp') no-repeat center center;
+    background-size: cover;
+    filter: blur(3px);
+    z-index: -1;
+}
+
+/* Navbar */
+.navbar {
+    width: 100%;
+    background-color: #333;
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    top: 0;
+    z-index: 100;
+}
+.navbar a { color: white; text-decoration: none; padding: 15px 20px; display: block; font-weight: bold; }
+.navbar a:hover, .navbar a.active { background-color: gold; color: black; }
+
+/* Hero Section */
+.hero-container {
+    position: relative;
+    width: 100%;
+    height: 40vh;
+    margin-top: 60px;
+    overflow: hidden;
+}
+.hero-image { display: none; }
+.hero-overlay { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+.hero-overlay h1 { color: white; font-size: 48px; text-shadow: 2px 2px 8px rgba(0,0,0,0.7); }
+
+/* Form Container */
+.form-container {
+    max-width: 700px;
+    margin: -30px auto 40px auto;
+    padding: 30px;
+    background-color: rgba(255,255,255,0.95);
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    text-align: center;
+}
+.form-container input, .form-container select, .form-container textarea {
+    width: 80%;
+    padding: 12px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
+.button-container { margin: 20px 0; }
+.button-container button {
+    padding: 15px 25px; margin: 10px; font-size: 16px; cursor: pointer;
+    border: none; border-radius: 5px; background-color: gold; color: black; font-weight: bold;
+}
+.button-container button:hover { background-color: orange; }
+.submit-btn { background-color: #333; color: white; width: 50%; margin-top:20px; padding:12px; }
+.submit-btn:hover { background-color: black; }
+
+/* Decoration Images */
+.decorations-container { display: none; flex-wrap: wrap; justify-content: center; margin-top: 20px; }
+.decoration-item { 
+    display: flex; flex-direction: column; align-items: center; margin: 10px; 
+    cursor: pointer; border: 3px solid transparent; border-radius: 5px; overflow: hidden;
+}
+.decoration-item.selected { border-color: gold; }
+.decoration-item img {
+    width: 220px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    display: block;
+}
+.decoration-item {
+    width: 240px;
+    min-height: 260px;
+}
+.decoration-item .cost { margin-top: 5px; font-weight: bold; color: #333; }
+
+/* PDF Upload */
+.pdf-upload { display: none; margin-top: 20px; }
+
+/* Responsive */
+@media(max-width:768px){
+    .hero-overlay h1 { font-size: 36px; }
+    .form-container input, .form-container select, .form-container textarea { width: 95%; }
+    .button-container button { width: 45%; margin: 5px 0; }
+    .decoration-item img { width: 45%; height: auto; }
+}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="event.html" class="active">Event</a>
+    <a href="food.html">Food Menu</a>
+    <a href="bill.html">Total Bill</a>
+    <a href="contact.html">Contact</a>
+</div>
+
+<div class="hero-container">
+    <img src="/assests/event back.webp" alt="Hero Image" class="hero-image">
+    <div class="hero-overlay"><h1>Plan Your Event</h1></div>
+</div>
+
+<div class="form-container">
+    <input type="text" id="name" placeholder="Your Name">
+    <input
+type="email"
+id="email"
+placeholder="Your Email"
+required>
+   <input
+type="tel"
+id="phone"
+placeholder="Your Phone Number"
+maxlength="10"
+pattern="[0-9]{10}"
+required>
+
+    <select id="eventType">
+        <option value="">Select Event</option>
+        <option>Birthday</option>
+        <option>Anniversary</option>
+        <option>Wedding</option>
+        <option>Engagement</option>
+        <option>Reception</option>
+        <option>Sangeet</option>
+        <option>Haldi</option>
+        <option>Baby Shower</option>
+        <option>Naming Ceremony</option>
+        <option>Saree Function</option>
+        <option>Family Gatherings</option>
+        <option>Farewell</option>
+        <option>Retirement</option>
+        <option>Dhothi Function</option>
+    </select>
+
+   <input
+type="number"
+id="chairs"
+placeholder="Number of Chairs"
+min="10"
+required>
+    <input type="date" id="eventDate" required>
+    <input type="time" id="eventTime" required>
+    <textarea id="welcomeMsg" rows="3" placeholder="Enter your welcome message"></textarea>
+
+    <div class="button-container">
+        <button id="selectDecoration">Select Decoration from Us</button>
+        <button id="makeYourDesign">Make Your Own Design</button>
+    </div>
+
+    <div class="decorations-container" id="decorationsContainer">
+
+        <!-- Wedding -->
+        <div class="decoration-item" data-event="Wedding" data-cost="55000">
+            <img src="/assests/W1.jpg" alt="Wedding Decoration 1">
+            <div class="cost">₹55000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Wedding" data-cost="65000">
+            <img src="/assests/W2.jpeg" alt="Wedding Decoration 2">
+            <div class="cost">₹65000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Wedding" data-cost="70000">
+            <img src="/assests/W3.webp" alt="Wedding Decoration 3">
+            <div class="cost">₹70000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Wedding" data-cost="90000">
+            <img src="/assests/W4.jpg" alt="Wedding Decoration 4">
+            <div class="cost">₹90000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Wedding" data-cost="120000">
+            <img src="/assests/W5.jpg" alt="Wedding Decoration 5">
+            <div class="cost">₹1,20,000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Wedding" data-cost="130000">
+            <img src="/assests/W6.jpg" alt="Wedding Decoration 6">
+            <div class="cost">₹1,30,000</div>
+        </div>
+
+        <!-- Engagement -->
+        <div class="decoration-item" data-event="Engagement" data-cost="45000">
+            <img src="/assests/En1.webp" alt="Engagement Decoration 1">
+            <div class="cost">₹45000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Engagement" data-cost="65000">
+            <img src="/assests/En2.jpg" alt="Engagement Decoration 2">
+            <div class="cost">₹65000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Engagement" data-cost="70000">
+            <img src="/assests/E3.jpg" alt="Engagement Decoration 3">
+            <div class="cost">₹70000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Engagement" data-cost="80000">
+            <img src="/assests/E4.avif" alt="Engagement Decoration 4">
+            <div class="cost">₹80000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Engagement" data-cost="100000">
+            <img src="/assests/E5.avif" alt="Engagement Decoration 5">
+            <div class="cost">₹1,00,000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Engagement" data-cost="110000">
+            <img src="/assests/E6.jpeg" alt="Engagement Decoration 6">
+            <div class="cost">₹1,10,000</div>
+        </div>
+
+        <!-- Reception -->
+        <div class="decoration-item" data-event="Reception" data-cost="55000">
+            <img src="/assests/R1.jpg" alt="Reception Decoration 1">
+            <div class="cost">₹55000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Reception" data-cost="65000">
+            <img src="/assests/R2.jpeg" alt="Reception Decoration 2">
+            <div class="cost">₹65000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Reception" data-cost="70000">
+            <img src="/assests/R3.jpg" alt="Reception Decoration 3">
+            <div class="cost">₹70000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Reception" data-cost="90000">
+            <img src="/assests/R4.jpeg" alt="Reception Decoration 4">
+            <div class="cost">₹90000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Reception" data-cost="125000">
+            <img src="/assests/R5.webp" alt="Reception Decoration 5">
+            <div class="cost">₹1,25,000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Reception" data-cost="125000">
+            <img src="/assests/R6.webp" alt="Reception Decoration 6">
+            <div class="cost">₹1,25,000</div>
+        </div>
+
+        <!-- Sangeet -->
+        <div class="decoration-item" data-event="Sangeet" data-cost="30000">
+            <img src="/assests/s1.avif" alt="Sangeet Decoration 1">
+            <div class="cost">₹30000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Sangeet" data-cost="45000">
+            <img src="/assests/s2.jpeg" alt="Sangeet Decoration 2">
+            <div class="cost">₹45000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Sangeet" data-cost="60000">
+            <img src="/assests/s3.jpg" alt="Sangeet Decoration 3">
+            <div class="cost">₹60000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Sangeet" data-cost="80000">
+            <img src="/assests/s4.jpeg" alt="Sangeet Decoration 4">
+            <div class="cost">₹80000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Sangeet" data-cost="90000">
+            <img src="/assests/s5.png" alt="Sangeet Decoration 5">
+            <div class="cost">₹90000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Sangeet" data-cost="100000">
+            <img src="/assests/s6.jpg" alt="Sangeet Decoration 6">
+            <div class="cost">₹1,00,000</div>
+        </div>
+
+        <!-- Haldi -->
+        <div class="decoration-item" data-event="Haldi" data-cost="25000">
+            <img src="/assests/h1.webp" alt="Haldi Decoration 1">
+            <div class="cost">₹25000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Haldi" data-cost="40000">
+            <img src="/assests/h2.jpg" alt="Haldi Decoration 2">
+            <div class="cost">₹40000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Haldi" data-cost="65000">
+            <img src="/assests/h3.jpg" alt="Haldi Decoration 3">
+            <div class="cost">₹65000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Haldi" data-cost="70000">
+            <img src="/assests/h4.webp" alt="Haldi Decoration 4">
+            <div class="cost">₹70000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Haldi" data-cost="80000">
+            <img src="/assests/h6.webp" alt="Haldi Decoration 5">
+            <div class="cost">₹80000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Haldi" data-cost="90000">
+            <img src="/assests/h5.jpg" alt="Haldi Decoration 6">
+            <div class="cost">₹90000</div>
+        </div>
+
+        <!-- Baby Shower -->
+        <div class="decoration-item" data-event="Baby Shower" data-cost="40000">
+            <img src="/assests/b1.jpeg" alt="Baby Shower Decoration 1">
+            <div class="cost">₹40000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Baby Shower" data-cost="65000">
+            <img src="/assests/b2.png" alt="Baby Shower Decoration 2">
+            <div class="cost">₹65000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Baby Shower" data-cost="80000">
+            <img src="/assests/b3.jpg" alt="Baby Shower Decoration 3">
+            <div class="cost">₹80000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Baby Shower" data-cost="100000">
+            <img src="/assests/b5.jpg" alt="Baby Shower Decoration 4">
+            <div class="cost">₹1,00,000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Baby Shower" data-cost="110000">
+            <img src="/assests/b4.webp" alt="Baby Shower Decoration 5">
+            <div class="cost">₹1,10,000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Baby Shower" data-cost="125000">
+            <img src="/assests/b6.jpg" alt="Baby Shower Decoration 6">
+            <div class="cost">₹1,25,000</div>
+        </div>
+
+        <!-- Naming Ceremony -->
+        <div class="decoration-item" data-event="Naming Ceremony" data-cost="30000">
+            <img src="/assests/n1.webp" alt="Naming Ceremony Decoration 1">
+            <div class="cost">₹30000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Naming Ceremony" data-cost="40000">
+            <img src="/assests/n3.webp" alt="Naming Ceremony Decoration 2">
+            <div class="cost">₹40000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Naming Ceremony" data-cost="45000">
+            <img src="/assests/n2.webp" alt="Naming Ceremony Decoration 3">
+            <div class="cost">₹45000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Naming Ceremony" data-cost="55000">
+            <img src="/assests/n4.webp" alt="Naming Ceremony Decoration 4">
+            <div class="cost">₹55000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Naming Ceremony" data-cost="60000">
+            <img src="/assests/n5.jpeg" alt="Naming Ceremony Decoration 5">
+            <div class="cost">₹60000</div>
+        </div>
+
+        <div class="decoration-item" data-event="Naming Ceremony" data-cost="75000">
+            <img src="/assests/n6.jpg" alt="Naming Ceremony Decoration 6">
+            <div class="cost">₹75000</div>
+        </div>
+
+        <!-- Saree Function Decorations -->
+<div class="decoration-item" data-event="Saree Function" data-cost="45000">
+    <img src="/assests/saree1.jpeg" alt="Saree Function Decoration 1">
+    <div class="cost">₹45000</div>
+</div>
+
+<div class="decoration-item" data-event="Saree Function" data-cost="60000">
+    <img src="/assests/saree2.jpeg" alt="Saree Function Decoration 2">
+    <div class="cost">₹60000</div>
+</div>
+
+<div class="decoration-item" data-event="Saree Function" data-cost="65000">
+    <img src="/assests/saree3.jpg" alt="Saree Function Decoration 3">
+    <div class="cost">₹65000</div>
+</div>
+
+<div class="decoration-item" data-event="Saree Function" data-cost="70000">
+    <img src="/assests/saree4.webp" alt="Saree Function Decoration 4">
+    <div class="cost">₹70000</div>
+</div>
+
+<div class="decoration-item" data-event="Saree Function" data-cost="75000">
+    <img src="/assests/saree5.png" alt="Saree Function Decoration 5">
+    <div class="cost">₹75000</div>
+</div>
+
+<div class="decoration-item" data-event="Saree Function" data-cost="80000">
+    <img src="/assests/saree6.jpg" alt="Saree Function Decoration 6">
+    <div class="cost">₹80000</div>
+</div>
+
+<!-- Birthday Decorations -->
+<div class="decoration-item" data-event="Birthday" data-cost="50000">
+    <img src="/assests/birthday 1.jpg" alt="Birthday Decoration 1">
+    <div class="cost">₹50000</div>
+</div>
+
+<div class="decoration-item" data-event="Birthday" data-cost="65000">
+    <img src="/assests/B2.webp" alt="Birthday Decoration 2">
+    <div class="cost">₹65000</div>
+</div>
+
+<div class="decoration-item" data-event="Birthday" data-cost="75000">
+    <img src="/assests/B3.webp" alt="Birthday Decoration 3">
+    <div class="cost">₹75000</div>
+</div>
+
+<div class="decoration-item" data-event="Birthday" data-cost="80000">
+    <img src="/assests/B4.jpg" alt="Birthday Decoration 4">
+    <div class="cost">₹80000</div>
+</div>
+
+<div class="decoration-item" data-event="Birthday" data-cost="95000">
+    <img src="/assests/B5.webp" alt="Birthday Decoration 5">
+    <div class="cost">₹95000</div>
+</div>
+
+<div class="decoration-item" data-event="Birthday" data-cost="100000">
+    <img src="/assests/B6.webp" alt="Birthday Decoration 6">
+    <div class="cost">₹100000</div>
+</div>
+
+<!-- Anniversary Decorations -->
+<div class="decoration-item" data-event="Anniversary" data-cost="20000">
+    <img src="/assests/an1.webp" alt="Anniversary Decoration 1">
+    <div class="cost">₹20000</div>
+</div>
+
+<div class="decoration-item" data-event="Anniversary" data-cost="35000">
+    <img src="/assests/an 2.webp" alt="Anniversary Decoration 2">
+    <div class="cost">₹35000</div>
+</div>
+
+<div class="decoration-item" data-event="Anniversary" data-cost="50000">
+    <img src="/assests/an 3.jpg" alt="Anniversary Decoration 3">
+    <div class="cost">₹50000</div>
+</div>
+
+<!-- Farewell Decorations -->
+<div class="decoration-item" data-event="Farewell" data-cost="30000">
+    <img src="/assests/f1.jpg" alt="Farewell Decoration 1">
+    <div class="cost">₹30000</div>
+</div>
+
+<div class="decoration-item" data-event="Farewell" data-cost="40000">
+    <img src="/assests/f2.jpg" alt="Farewell Decoration 2">
+    <div class="cost">₹40000</div>
+</div>
+
+<div class="decoration-item" data-event="Farewell" data-cost="50000">
+    <img src="/assests/f3.jpg" alt="Farewell Decoration 3">
+    <div class="cost">₹50000</div>
+</div>
+
+<div class="decoration-item" data-event="Farewell" data-cost="55000">
+    <img src="/assests/f4.webp" alt="Farewell Decoration 4">
+    <div class="cost">₹55000</div>
+</div>
+
+<div class="decoration-item" data-event="Farewell" data-cost="60000">
+    <img src="/assests/f5.jpg" alt="Farewell Decoration 5">
+    <div class="cost">₹60000</div>
+</div>
+
+<div class="decoration-item" data-event="Farewell" data-cost="65000">
+    <img src="/assests/f6.jpg" alt="Farewell Decoration 6">
+    <div class="cost">₹65000</div>
+</div>
+
+<!-- Dhothi Function Decorations -->
+<div class="decoration-item" data-event="Dhothi Function" data-cost="45000">
+    <img src="/assests/d1.png" alt="Dhothi Function Decoration 1">
+    <div class="cost">₹45000</div>
+</div>
+
+<div class="decoration-item" data-event="Dhothi Function" data-cost="50000">
+    <img src="/assests/d2.jpg" alt="Dhothi Function Decoration 2">
+    <div class="cost">₹50000</div>
+</div>
+
+<div class="decoration-item" data-event="Dhothi Function" data-cost="60000">
+    <img src="/assests/d3.webp" alt="Dhothi Function Decoration 3">
+    <div class="cost">₹60000</div>
+</div>
+
+<div class="decoration-item" data-event="Dhothi Function" data-cost="70000">
+    <img src="/assests/d4.jpg" alt="Dhothi Function Decoration 4">
+    <div class="cost">₹70000</div>
+</div>
+
+<div class="decoration-item" data-event="Dhothi Function" data-cost="75000">
+    <img src="/assests/d5.jpg" alt="Dhothi Function Decoration 5">
+    <div class="cost">₹75000</div>
+</div>
+
+<div class="decoration-item" data-event="Dhothi Function" data-cost="90000">
+    <img src="/assests/d6.avif" alt="Dhothi Function Decoration 6">
+    <div class="cost">₹90000</div>
+</div>
+
+<!-- Retirement Decorations -->
+<div class="decoration-item" data-event="Retirement" data-cost="15000">
+    <img src="/assests/re1.webp" alt="Retirement Decoration 1">
+    <div class="cost">₹15000</div>
+</div>
+
+<div class="decoration-item" data-event="Retirement" data-cost="25000">
+    <img src="/assests/re2.jpg" alt="Retirement Decoration 2">
+    <div class="cost">₹25000</div>
+</div>
+
+<div class="decoration-item" data-event="Retirement" data-cost="55000">
+    <img src="/assests/re3.jpg" alt="Retirement Decoration 3">
+    <div class="cost">₹55000</div>
+</div>
+
+<!-- Family Gatherings Decorations -->
+<div class="decoration-item" data-event="Family Gatherings" data-cost="20000">
+    <img src="/assests/reu2.jpeg" alt="Family Gatherings Decoration 1">
+    <div class="cost">₹20000</div>
+</div>
+
+<div class="decoration-item" data-event="Family Gatherings" data-cost="30000">
+    <img src="/assests/reu1.jpg" alt="Family Gatherings Decoration 2">
+    <div class="cost">₹30000</div>
+</div>
+
+<div class="decoration-item" data-event="Family Gatherings" data-cost="35000">
+    <img src="/assests/reu3.jpg" alt="Family Gatherings Decoration 3">
+    <div class="cost">₹35000</div>
+</div>
+
+
+
+
+
+    </div>
+
+    <div class="pdf-upload" id="pdfUpload">
+        <p>Please upload your design (PDF format)</p>
+        <input type="file" id="pdfFile" accept="application/pdf"><br>
+        <button class="submit-btn" id="submitPDF">Submit Design</button>
+    </div>
+
+    <button class="submit-btn" id="submitEvent">Submit</button>
+</div>
+
+<script>
+// Navbar Active
+const navbarLinks = document.querySelectorAll('.navbar a');
+navbarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        navbarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+
+// Decoration Selection Logic
+const selectBtn = document.getElementById('selectDecoration');
+const makeBtn = document.getElementById('makeYourDesign');
+const decoContainer = document.getElementById('decorationsContainer');
+const pdfContainer = document.getElementById('pdfUpload');
+let selectedDeco = null;
+
+// SELECT DECORATION
+selectBtn.addEventListener('click', () => {
+    const selectedEvent = document.getElementById('eventType').value;
+    if(!selectedEvent){
+        alert("Please select an event first!");
+        return;
+    }
+
+    pdfContainer.style.display = 'none';
+    decoContainer.style.display = 'flex';
+
+    const items = decoContainer.querySelectorAll('.decoration-item');
+    items.forEach(item => {
+        item.style.display = (item.dataset.event === selectedEvent) ? 'flex' : 'none';
+        item.classList.remove('selected');
+    });
+
+    items.forEach(item => {
+        item.onclick = () => {
+            items.forEach(i => i.classList.remove('selected'));
+            item.classList.add('selected');
+            const img = item.querySelector('img');
+            selectedDeco = {
+                type: selectedEvent,
+                image: img.src,
+                cost: parseInt(item.dataset.cost)
+            };
+        };
+    });
+});
+
+// MAKE YOUR OWN DESIGN
+makeBtn.addEventListener('click', () => {
+    pdfContainer.style.display = 'block';
+    decoContainer.style.display = 'none';
+    selectedDeco = null;
+
+    document.getElementById('submitPDF').onclick = () => {
+        const pdfFile = document.getElementById('pdfFile').files[0];
+        if(pdfFile){
+            const decorationData = { type: "Make Your Own Design", cost: 75000 };
+            localStorage.setItem('decorationSelection', JSON.stringify(decorationData));
+            alert("Your design has been uploaded successfully!");
+        } else {
+            alert("Please select a PDF file first!");
+        }
+    };
+});
+
+// SUBMIT EVENT
+document.getElementById('submitEvent').addEventListener('click', () => {
+
+const name = document.getElementById('name').value.trim();
+const email = document.getElementById('email').value.trim();
+const phone = document.getElementById('phone').value.trim();
+const eventType = document.getElementById('eventType').value;
+const chairs = document.getElementById('chairs').value;
+const eventDate = document.getElementById('eventDate').value;
+const eventTime = document.getElementById('eventTime').value;
+
+if(
+    !name ||
+    !email ||
+    !phone ||
+    !eventType ||
+    !chairs ||
+    !eventDate ||
+    !eventTime
+){
+    alert("Please fill all required fields.");
+    return;
+}
+if(!selectedDeco &&
+   document.getElementById('pdfUpload').style.display !== 'block'){
+    alert("Please select a decoration design.");
+    return;
+}
+const eventData = {
+    name,
+    email,
+    phone,
+    event: eventType,
+    chairs: parseInt(chairs),
+    eventDate,
+    eventTime,
+    welcomeMessage: document.getElementById('welcomeMsg').value
+};
+    localStorage.setItem('eventData', JSON.stringify(eventData));
+
+    // Save selected decoration
+    if(selectedDeco){
+        localStorage.setItem('decorationSelection', JSON.stringify(selectedDeco));
+    }
+
+    alert("🎉 Event details submitted successfully! Proceed to Food Selection.");
+
+});
+</script>
+
+</body>
+</html>

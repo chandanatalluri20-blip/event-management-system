@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventEase - Total Bill</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+body, html{
+    margin:0;
+    padding:0;
+    font-family:Arial;
+    height:100%;
+}
+
+/* Full-page blurred background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/assests/black background.jpg') no-repeat center center;
+    background-size: cover;
+    filter: blur(3px);
+    z-index: -1;
+}
+
+/* NAVBAR */
+.navbar{
+    width:100%;
+    background:#333;
+    display:flex;
+    justify-content:space-around;
+    position:fixed;
+    top:0;
+    z-index:100;
+}
+.navbar a{
+    color:white;
+    padding:15px 20px;
+    text-decoration:none;
+    font-weight:bold;
+}
+.navbar a:hover,.navbar a.active{
+    background:gold;
+    color:black;
+}
+
+/* HERO */
+.hero-container{
+    width:100%;
+    height:40vh;
+    margin-top:60px;
+    position:relative;
+    overflow:hidden;
+}
+.hero-image{
+    display:none; /* hide original image, background handled via body::before */
+}
+.hero-overlay{
+    position:absolute;
+    top:50%;
+    left:50%;
+    transform:translate(-50%,-50%);
+    text-align:center;
+}
+.hero-overlay h1{
+    color:white;
+    font-size:48px;
+}
+
+/* BILL SECTION */
+.bill-container{
+    max-width:900px;
+    margin:30px auto;
+    background:#fff;
+    padding:30px;
+    border-radius:10px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.2);
+    text-align:center;
+}
+
+.bill-container h2{
+    margin-bottom:20px;
+    font-size:28px;
+}
+
+.bill-box{
+    background:#f9f9f9;
+    padding:25px;
+    border-radius:10px;
+    margin-top:10px;
+}
+
+/* BUTTONS */
+.pay-btn,.pdf-btn,.new-btn{
+    padding:15px 30px;
+    background:#333;
+    color:white;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    margin:15px 5px;
+}
+
+.pay-btn:hover,.pdf-btn:hover,.new-btn:hover{
+    background:black
+}
+
+.warning{
+    color:red;
+    font-weight:bold;
+    font-size:16px;
+}
+
+/* SCANNER */
+.overlay{
+    display:none;
+    position:fixed;
+    top:0;left:0;
+    width:100%;height:100%;
+    background:rgba(0,0,0,.6);
+    justify-content:center;
+    align-items:center;
+    z-index:999;
+}
+
+.scanner-box{
+    background:white;
+    width:350px;
+    padding:20px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.scanner-box img{
+    width:200px;
+    margin:15px 0;
+}
+
+.success-msg{
+    color:green;
+    font-weight:bold;
+    display:none
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <a href="home.html">Home</a>
+    <a href="about.html">About</a>
+    <a href="event.html">Event</a>
+    <a href="food.html">Food</a>
+    <a href="bill.html" class="active">Total Bill</a>
+    <a href="contact.html">Contact</a>
+</div>
+
+<div class="hero-container">
+    <img src="/assests/black background.jpg" class="hero-image">
+    <div class="hero-overlay"><h1>Total Bill</h1></div>
+</div>
+
+<div class="bill-container">
+
+<h2>🧾 Your Bill Summary</h2>
+
+<div class="bill-box" id="billBox">
+   <p class="warning">
+    Please complete Event & Food sections to see your bill
+   </p>
+</div>
+
+<div>
+<button class="pdf-btn" id="downloadPDF" style="display:none;">Download Receipt (PDF)</button>
+<button class="pay-btn" id="payAdvance" style="display:none;">Pay 50% Advance</button>
+<button class="new-btn" id="newEventBtn" style="display:none;">Plan New Event</button>
+</div>
+
+</div>
+
+<!-- Scanner -->
+<div class="overlay" id="scannerOverlay">
+<div class="scanner-box">
+<h3>Scan & Pay</h3>
+<img src="images/dummy_qr.png">
+<p>Amount : ₹<span id="advanceAmount"></span></p>
+<button class="pay-btn" id="paymentDoneBtn">Payment Done</button>
+<p class="success-msg" id="successMsg">✅ Payment Successful</p>
+</div>
+</div>
+
+<script>
+// JS logic unchanged except safe conversion for decoration cost & small safeguards
+
+window.onload=()=>{
+ document.getElementById("scannerOverlay").style.display="none";
+ document.getElementById("successMsg").style.display="none";
+}
+
+let paymentCompleted = false;
+let pdfDownloaded = false;
+
+function resetBillSection(){
+    paymentCompleted = false;
+    pdfDownloaded = false;
+    localStorage.removeItem("eventData");
+    localStorage.removeItem("decorationSelection");
+    localStorage.removeItem("foodSelection");
+    billBox.innerHTML = `<p class="warning">Please complete Event & Food sections to see your bill</p>`;
+    pdfBtn.style.display = "none";
+    payBtn.style.display = "none";
+    newBtn.style.display = "none";
+    document.querySelector(".hero-container").scrollIntoView({behavior:"smooth"});
+}
+
+function checkAndReset(){
+    if(paymentCompleted && pdfDownloaded){
+        setTimeout(()=>{ resetBillSection(); },1000);
+    }
+}
+
+const billBox=document.getElementById("billBox");
+const pdfBtn=document.getElementById("downloadPDF");
+const payBtn=document.getElementById("payAdvance");
+const newBtn=document.getElementById("newEventBtn");
+
+let eventData=JSON.parse(localStorage.getItem("eventData"))||{};
+let decorationData=JSON.parse(localStorage.getItem("decorationSelection"))||{};
+let foodData=JSON.parse(localStorage.getItem("foodSelection"))||{};
+
+/* Minimal helper: format INR with commas for display only */
+function formatINR(num){
+    if (num === null || num === undefined || isNaN(num)) return "0";
+    return Number(num).toLocaleString('en-IN');
+}
+
+/* SAFE conversion for decoration cost: strip commas and coerce to Number */
+function safeNumberFrom(any){
+    if (any === undefined || any === null) return 0;
+    if (typeof any === 'number' && !isNaN(any)) return any;
+    const s = String(any).replace(/,/g, '').trim();
+    const n = Number(s);
+    return isNaN(n) ? 0 : n;
+}
+
+/* Determine validity: ensure event and food data exist */
+let valid = eventData && eventData.name && eventData.email && eventData.event && eventData.chairs && foodData && foodData.items && foodData.items.length>0;
+let bookingId="EE-"+Math.floor(100000+Math.random()*900000);
+
+/* DISCOUNT LOGIC */
+let users=JSON.parse(localStorage.getItem("users"))||{};
+let discount=0;
+if(eventData.email){
+ users[eventData.email]=(users[eventData.email]||0)+1;
+ localStorage.setItem("users",JSON.stringify(users));
+ if(users[eventData.email]==1) discount=15;
+ else if(users[eventData.email]==3) discount=20;
+ else if(users[eventData.email]>=5) discount=25;
+}
+
+if(valid){
+ let chairs=parseInt(eventData.chairs) || 0;
+
+ let perPlateCost= (foodData.numItems==15)?150:
+                   (foodData.numItems==20)?180:
+                   (foodData.numItems==25)?200:300;
+ let foodCost = chairs * perPlateCost;
+
+ let decorationText="";
+ let decorationCost=0;
+
+ if(decorationData && decorationData.type=="Make Your Own Design"){
+  decorationText=`You selected your own custom decoration style. We will bring your dream design to life ✨`;
+  decorationCost=75000;
+ }
+ else if(decorationData && (decorationData.type || decorationData.cost !== undefined)){
+  decorationCost = safeNumberFrom(decorationData.cost);
+  const decoType = decorationData.type ? decorationData.type : "Selected Decoration";
+  decorationText=`Selected Decoration : ${decoType} (₹${formatINR(decorationCost)})`;
+  if(decorationData.image){
+      decorationText+=`<br><img src="${decorationData.image}" style="max-width:200px;margin-top:10px;">`;
+  }
+ } else {
+  decorationText = "No decoration selected";
+  decorationCost = 0;
+ }
+
+ let total=decorationCost + foodCost;
+ let discountAmount=(discount/100)*total;
+ let finalBill= total - discountAmount;
+
+ billBox.innerHTML=`
+ <h3>📘 Booking Details</h3>
+ <p><b>Booking ID:</b> ${bookingId}</p>
+ <p><b>Name:</b> ${eventData.name}</p>
+ <p><b>Email:</b> ${eventData.email}</p>
+ <p><b>Event:</b> ${eventData.event}</p>
+ <p><b>Chairs :</b> ${chairs}</p>
+ <p><b>Event Date:</b> ${eventData.eventDate}</p>
+<p><b>Event Time:</b> ${eventData.eventTime}</p>
+<p><b>Event:</b> ${eventData.event}</p>
+ <hr>
+ <h3>🎨 Decoration</h3>
+ <p>${decorationText}</p>
+ <p><b>Decoration Cost :</b> ₹${formatINR(decorationCost)}</p>
+ <hr>
+ <h3>🍽 Food Calculation</h3>
+ <p>${chairs} plates × ₹${formatINR(perPlateCost)} per plate</p>
+ <p><b>Food Bill :</b> ₹${formatINR(foodCost)}</p>
+ <ul>${(foodData.items||[]).map(i=>`<li>${i}</li>`).join("")}</ul>
+ <hr>
+ <h3>💰 Discount Plan</h3>
+ <p>1st booking → 15% | 3rd booking → 20% | 5+ bookings → 25%</p>
+ <p><b>Your Discount :</b> ${discount}%</p>
+ <p><b>Total :</b> ₹${formatINR(total)}</p>
+ <p><b>Discount Applied :</b> ₹${formatINR(discountAmount)}</p>
+ <h2>Final Bill : ₹${formatINR(finalBill)}</h2>
+ `;
+
+ pdfBtn.style.display="inline-block";
+ payBtn.style.display="inline-block";
+ newBtn.style.display="inline-block";
+
+ payBtn.onclick=()=>{
+  document.getElementById("advanceAmount").innerText=Math.floor(finalBill/2);
+  document.getElementById("scannerOverlay").style.display="flex";
+ }
+
+ document.getElementById("paymentDoneBtn").onclick=()=>{
+  document.getElementById("successMsg").style.display="block";
+  setTimeout(()=>{
+   document.getElementById("scannerOverlay").style.display="none";
+   paymentCompleted = true;
+   checkAndReset();
+  },2000);
+ }
+
+ pdfBtn.onclick=()=>{
+  const{jsPDF}=window.jspdf;
+  const pdf=new jsPDF();
+  pdf.text("EventEase Receipt",20,20);
+  pdf.text("Booking ID : "+bookingId,20,30);
+  pdf.text("Name : "+eventData.name,20,40);
+  pdf.text("Email : "+eventData.email,20,50);
+  pdf.text("Decoration : "+(decorationData.type||"None"),20,60);
+  pdf.text("Food Bill : "+foodCost,20,70);
+  pdf.text("Total : "+total,20,80);
+  pdf.text("Discount : "+discount+"%",20,90);
+  pdf.text("Final Amount : "+finalBill,20,100);
+  pdf.save("EventEase_Receipt.pdf");
+  pdfDownloaded = true;
+  checkAndReset();
+ };
+
+ newBtn.onclick=()=>{
+     resetBillSection();
+     window.location.href="event.html";
+ }
+}
+</script>
+</body>
+</html>

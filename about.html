@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EventEase - About</title>
+
+<!-- CSS -->
+<style>
+/* Reset and base styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+}
+
+/* Full-page blurred background */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: url('/assests/about background.webp') no-repeat center center;
+    background-size: cover;
+    filter: blur(3px);
+    z-index: -1;
+}
+
+/* Navbar */
+.navbar {
+    width: 100%;
+    background-color: #333;
+    overflow: hidden;
+    display: flex;
+    justify-content: space-around;
+    position: fixed;
+    top: 0;
+    z-index: 100;
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    padding: 15px 20px;
+    display: block;
+    font-weight: bold;
+}
+
+.navbar a:hover, .navbar a.active {
+    background-color: gold;
+    color: black;
+}
+
+/* Hero Title */
+.hero-overlay {
+    margin-top: 60px; /* space for navbar */
+    text-align: center;
+    color: white;
+    font-size: 48px;
+    font-weight: bold;
+    text-shadow: 2px 2px 8px rgba(0,0,0,0.7);
+    padding: 20px;
+}
+
+/* About text box */
+.about-box {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 30px;
+    background-color: rgba(50,50,50,0.7); /* dark gray semi-transparent */
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    text-align: center;
+    line-height: 1.6;
+    font-size: 18px;
+    color: white; /* text in white */
+    backdrop-filter: blur(5px); /* keeps slight blur behind box */
+}
+
+/* Responsive */
+@media(max-width:768px){
+    .hero-overlay { font-size: 36px; }
+    .navbar a { padding: 12px 10px; font-size: 14px; }
+    .about-box { font-size: 16px; padding: 20px; }
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<div class="navbar">
+    <a href="home.html">Home</a>
+    <a href="about.html" class="active">About</a>
+    <a href="event.html">Event</a>
+    <a href="food.html">Food Menu</a>
+    <a href="bill.html">Total Bill</a>
+    <a href="contact.html">Contact</a>
+</div>
+
+<!-- Hero Title -->
+<div class="hero-overlay">
+    About
+</div>
+
+<!-- About Content Box -->
+<div class="about-box">
+EventEase brings your celebrations to life with beautiful designs, affordable pricing, and stress-free planning. We organise 10+ event types, each with multiple decoration themes and attractive discounts — 15% off on the first booking, 20% off on the third, and 25% off after five bookings. Our aim is to give you a premium event experience at a reasonable cost.
+<br><br>
+For food, we offer three flexible choices: Veg, Non-Veg, and Both. Each option includes a wide range of dishes, allowing you to pick 15, 20, 25, or 30+ items, all calculated using a per-plate cost system for better affordability. With plenty of tasty options, our menu is designed to suit every event and every guest.
+<br><br>
+
+Apart from the themes shown on our website, you can upload your own decoration idea in PDF format, and we will recreate it perfectly. Every booking includes a free welcome board gift on the event day. And if you feel something is missing, you can suggest it through the Queries section — we always try our best to improve your event experience.
+</div>
+
+<!-- JS -->
+<script>
+// Highlight active navbar link
+const navbarLinks = document.querySelectorAll('.navbar a');
+navbarLinks.forEach(link => {
+    link.addEventListener('click', () => {
+        navbarLinks.forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+    });
+});
+</script>
+
+</body>
+</html>
